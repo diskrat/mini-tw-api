@@ -1,21 +1,26 @@
 from django.contrib.auth.models import User
-from posts.models import Post
+from posts.models import Like, Post
 from rest_framework import serializers
 from rest_framework.response import Response
 
 
+class LikeSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Like
+        read_only_fields =  ['user']
+        fields = ['id','user','post','created']
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
+    user = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = Post
-        fields = ['id','owner','content','created']
+        fields = ['id','user','content','created']
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    posts = serializers.PrimaryKeyRelatedField(many=True, queryset=Post.objects.all())
     class Meta:
         model = User
-        fields = ['id', 'username','posts']
+        fields = ['id', 'username']
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +35,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return Response({'message':'user successfully created'})
+
+
+        
